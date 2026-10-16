@@ -468,7 +468,7 @@ TOURNAMENT_INVALID_STATE` rather than mutating state.
 - `GET /health` - Detailed health check (uptime, status)
 - `GET /metrics` - Prometheus metrics for HTTP, schedulers, oracle, predictions, WebSocket, rate limits, and DB pool settings
 - `GET /api/price` - **Production only.** Current XLM/USD oracle price as a decimal string (`price_usd`) with staleness / provider info. **Not** an alias of `/api/prices`.
-- `GET /api/prices` - Multi-asset BTC / ETH / XLM ticker (CoinGecko, 30 s cache). Production returns the raw object; the hackathon app wraps it in `{ success, data }`. **Not** an alias of `/api/price`.
+- `GET /api/prices` - Multi-asset BTC / ETH / XLM ticker (CoinGecko, 30 s cache). Both apps return the same `{ success, data }` envelope (and `503 { success: false, error }` when no price data is available). **Not** an alias of `/api/price`.
 - `GET /api-docs` - Swagger UI documentation
 - `GET /api-docs.json` - OpenAPI specification
 
