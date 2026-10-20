@@ -23,6 +23,7 @@ import express, {
   Router,
 } from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 
 import authRoutes from './routes/auth.routes';
@@ -193,6 +194,14 @@ function mountBaseMiddleware(app: Application, mode: AppMode): void {
   // Permissions-Policy that helmet's defaults do not set (Issue #414/#480).
   app.use(securityHeadersMiddleware);
 
+  // gzip/deflate for compressible bodies (JSON, text) above the default 1 kb
+  // threshold, negotiated via Accept-Encoding (#699). Registered before any
+  // route so every response passes through it; already-encoded and
+  // non-compressible content types are skipped by the middleware's default
+  // filter. Socket.IO attaches to the HTTP server directly and never reaches
+  // this stack.
+  app.use(compression());
+
   const jsonLimit = process.env.JSON_BODY_LIMIT || '16kb';
   app.use(express.json({ limit: jsonLimit }));
   if (mode === 'full') {
@@ -286,9 +295,10 @@ function mountApiRoutes(
   }
 
   // Multi-asset price ticker. Defines its own `/prices` path, so it mounts at
-  // the API root rather than under a prefix. The two modes serve different
-  // response shapes (raw snapshot vs. success envelope), so the router is
-  // mode-specific like rounds and leaderboard above.
+  // the API root rather than under a prefix. Both routers delegate to the same
+  // handler, so the `{ success, data }` envelope is identical across modes
+  // (#639); they stay separate only because each carries the OpenAPI
+  // description for its own spec.
   target.use('/', mode === 'full' ? pricesRoutes : indexRoutes);
 
   if (features.legacyPriceEndpoint) {
