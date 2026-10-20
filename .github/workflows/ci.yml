@@ -139,6 +139,7 @@ jobs:
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
       JWT_SECRET: ci-test-secret
+      RUN_DB_TESTS: "true"
 
     services:
       postgres:
@@ -169,10 +170,15 @@ jobs:
         run: npm ci
 
       - name: Run database migrations
-        run: npm run db:migrate
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
 
       - name: Run integration tests
         run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
+          RUN_DB_TESTS: "true"
 
   test-hackathon-http:
     name: test (hackathon HTTP)
@@ -181,6 +187,7 @@ jobs:
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
       JWT_SECRET: ci-test-secret
+      RUN_DB_TESTS: "true"
 
     services:
       postgres:
@@ -211,7 +218,12 @@ jobs:
         run: npm ci
 
       - name: Run database migrations
-        run: npm run db:migrate
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
 
       - name: Run hackathon HTTP tests
         run: npm run test:hackathon:http
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/xelma_ci
+          RUN_DB_TESTS: "true"
