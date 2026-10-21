@@ -203,6 +203,13 @@ function mountBaseMiddleware(app: Application, mode: AppMode): void {
   app.use(compression());
 
   const jsonLimit = process.env.JSON_BODY_LIMIT || '16kb';
+  const chatLimit = process.env.CHAT_BODY_LIMIT || jsonLimit;
+  const predictionsLimit = process.env.PREDICTIONS_BODY_LIMIT || jsonLimit;
+
+  // Dedicated request body size limits for chat and predictions routes (#891)
+  app.use(['/api/chat', '/api/v1/chat'], express.json({ limit: chatLimit }));
+  app.use(['/api/predictions', '/api/v1/predictions'], express.json({ limit: predictionsLimit }));
+
   app.use(express.json({ limit: jsonLimit }));
   if (mode === 'full') {
     app.use(express.urlencoded({ extended: true, limit: jsonLimit }));
