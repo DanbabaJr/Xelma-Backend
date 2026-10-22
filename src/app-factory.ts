@@ -350,10 +350,14 @@ export function createApp(options: CreateAppOptions = {}): Application {
   }
 
   if (features.deprecationHeaders) {
+    const apiSunsetDate =
+      config.app?.apiSunsetDate ||
+      process.env.API_SUNSET_DATE ||
+      'Sat, 01 Jan 2027 00:00:00 GMT';
     app.use('/api', (req: Request, res: Response, next: NextFunction) => {
       if (!req.path.startsWith('/v1')) {
         res.setHeader('Deprecation', 'true');
-        res.setHeader('Sunset', 'Sat, 01 Jan 2027 00:00:00 GMT');
+        res.setHeader('Sunset', apiSunsetDate);
         res.setHeader('Link', `</api/v1${req.path}>; rel="successor-version"`);
       }
       next();
